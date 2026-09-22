@@ -8,9 +8,9 @@ export class ApiError extends Error {
 }
 
 export const Errors = {
-  NotFound: (msg = '资源不存在') => new ApiError(404, msg),
-  Forbidden: (msg = '无权访问') => new ApiError(403, msg),
-  BadRequest: (msg = '请求参数不合法') => new ApiError(400, msg),
-  Unauthorized: (msg = '未授权') => new ApiError(401, msg),
-  Conflict: (msg = '数据冲突') => new ApiError(409, msg),
+  NotFound: (msg = 'Resource not found') => new ApiError(404, msg),
+  Forbidden: (msg = 'Forbidden') => new ApiError(403, msg),
+  BadRequest: (msg = 'Invalid request parameters') => new ApiError(400, msg),
+  Unauthorized: (msg = 'Unauthorized') => new ApiError(401, msg),
+  Conflict: (msg = 'Conflict') => new ApiError(409, msg),
 };

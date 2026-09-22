@@ -5,10 +5,10 @@ import { Tag } from '../../types';
 
 export class TagsService {
   create(userId: string, name: string): Tag {
-    if (!name || !name.trim()) throw Errors.BadRequest('标签名不能为空');
+    if (!name || !name.trim()) throw Errors.BadRequest('Tag name is required');
     const trimmed = name.trim();
     const existing = [...store.tags.values()].find((t) => t.userId === userId && t.name === trimmed);
-    if (existing) throw Errors.Conflict('标签已存在');
+    if (existing) throw Errors.Conflict('Tag already exists');
 
     const tag: Tag = { id: randomUUID(), userId, name: trimmed };
     store.tags.set(tag.id, tag);
@@ -21,13 +21,13 @@ export class TagsService {
 
   private getOwned(userId: string, id: string): Tag {
     const tag = store.tags.get(id);
-    if (!tag || tag.userId !== userId) throw Errors.NotFound('标签不存在');
+    if (!tag || tag.userId !== userId) throw Errors.NotFound('Tag not found');
     return tag;
   }
 
   rename(userId: string, id: string, name: string): Tag {
     const tag = this.getOwned(userId, id);
-    if (!name || !name.trim()) throw Errors.BadRequest('标签名不能为空');
+    if (!name || !name.trim()) throw Errors.BadRequest('Tag name is required');
     tag.name = name.trim();
     return tag;
   }
@@ -38,12 +38,12 @@ export class TagsService {
     store.noteTags = store.noteTags.filter((nt) => nt.tagId !== id);
   }
 
-  /** 覆盖式设置一篇笔记的标签集合，对应 PUT /notes/:id/tags */
+  /** Overwrites a note's tag set. Corresponds to PUT /notes/:id/tags */
   setNoteTags(userId: string, noteId: string, tagIds: string[]): void {
     const note = store.notes.get(noteId);
-    if (!note || note.userId !== userId) throw Errors.NotFound('笔记不存在');
+    if (!note || note.userId !== userId) throw Errors.NotFound('Note not found');
     for (const tagId of tagIds) {
-      this.getOwned(userId, tagId); // 校验每个标签都属于当前用户
+      this.getOwned(userId, tagId); // verify each tag belongs to the current user
     }
     store.noteTags = store.noteTags.filter((nt) => nt.noteId !== noteId);
     for (const tagId of tagIds) {

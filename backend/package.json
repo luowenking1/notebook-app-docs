@@ -2,7 +2,7 @@
   "name": "notebook-app-backend",
   "version": "0.1.0",
   "private": true,
-  "description": "个人笔记应用后端 API 服务",
+  "description": "Backend API service for the personal notebook app",
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "start": "node dist/server.js",

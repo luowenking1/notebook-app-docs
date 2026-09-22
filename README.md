@@ -1,12 +1,12 @@
 # Notebook App
 
-个人笔记应用：产品文档 + 后端实现。
+A personal notebook app: product docs + backend implementation.
 
-## 文档
+## Docs
 
-- [需求文档](./需求文档-个人笔记应用.md)
-- [技术文档](./技术文档-个人笔记应用.md)
+- [Requirements (PRD)](./requirements.md)
+- [Technical Design](./technical-design.md)
 
-## 代码
+## Code
 
-- [`backend/`](./backend) — Node.js + TypeScript + Express 后端 API，含完整单元/集成测试（51 用例全部通过）。详见 [backend/README.md](./backend/README.md)。
+- [`backend/`](./backend) — Node.js + TypeScript + Express backend API, with a full unit/integration test suite (51 tests, all passing). See [backend/README.md](./backend/README.md) for details.

@@ -7,7 +7,7 @@ export function errorHandler(err: unknown, req: Request, res: Response, next: Ne
     res.status(err.status).json({ message: err.message });
     return;
   }
-  // 未预期的错误，记录日志并返回通用 500
+  // Unexpected error: log it and return a generic 500
   // eslint-disable-next-line no-console
   console.error(err);
   res.status(500).json({ message: 'Internal server error' });

@@ -27,9 +27,9 @@ export interface ListNotesOptions {
 
 export class NotesService {
   create(userId: string, input: CreateNoteInput): Note {
-    if (!input.title || !input.title.trim()) throw Errors.BadRequest('标题不能为空');
+    if (!input.title || !input.title.trim()) throw Errors.BadRequest('Title is required');
     const notebook = store.notebooks.get(input.notebookId);
-    if (!notebook || notebook.userId !== userId) throw Errors.NotFound('笔记本不存在');
+    if (!notebook || notebook.userId !== userId) throw Errors.NotFound('Notebook not found');
 
     const now = new Date().toISOString();
     const note: Note = {
@@ -50,15 +50,15 @@ export class NotesService {
 
   getOwned(userId: string, id: string): Note {
     const note = store.notes.get(id);
-    if (!note || note.userId !== userId) throw Errors.NotFound('笔记不存在');
+    if (!note || note.userId !== userId) throw Errors.NotFound('Note not found');
     return note;
   }
 
-  /** 对应 PATCH /notes/:id，前端自动保存调用的即是这个方法 */
+  /** Corresponds to PATCH /notes/:id — this is what the frontend's auto-save calls */
   update(userId: string, id: string, input: UpdateNoteInput): Note {
     const note = this.getOwned(userId, id);
     if (input.title !== undefined) {
-      if (!input.title.trim()) throw Errors.BadRequest('标题不能为空');
+      if (!input.title.trim()) throw Errors.BadRequest('Title is required');
       note.title = input.title.trim();
     }
     if (input.content !== undefined) {
@@ -66,7 +66,7 @@ export class NotesService {
     }
     if (input.notebookId !== undefined) {
       const nb = store.notebooks.get(input.notebookId);
-      if (!nb || nb.userId !== userId) throw Errors.NotFound('笔记本不存在');
+      if (!nb || nb.userId !== userId) throw Errors.NotFound('Notebook not found');
       note.notebookId = input.notebookId;
     }
     note.updatedAt = new Date().toISOString();
@@ -87,7 +87,7 @@ export class NotesService {
       results = results.filter((n) => noteIdsWithTag.has(n.id));
     }
 
-    // 置顶笔记优先，其次按更新时间倒序
+    // Pinned notes first, then sorted by updated time descending
     results.sort((a, b) => {
       if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1;
       return a.updatedAt < b.updatedAt ? 1 : -1;
@@ -106,7 +106,7 @@ export class NotesService {
 
   restore(userId: string, id: string): Note {
     const note = this.getOwned(userId, id);
-    if (!note.isDeleted) throw Errors.BadRequest('笔记不在回收站中');
+    if (!note.isDeleted) throw Errors.BadRequest('Note is not in the trash');
     note.isDeleted = false;
     note.deletedAt = null;
     return note;
@@ -125,8 +125,10 @@ export class NotesService {
   }
 
   /**
-   * 清理回收站中超过 30 天的笔记（对应需求文档 3.6 节：回收站保留30天并定时清理）。
-   * 返回本次清理的笔记数量，便于测试和日志观察。
+   * Purge notes that have been in the trash for more than 30 days
+   * (corresponds to PRD Section 3.6: trash is retained for 30 days and
+   * cleaned up on a schedule). Returns the number of notes purged, which
+   * is convenient for tests and logging.
    */
   purgeExpired(now: Date = new Date()): number {
     let count = 0;

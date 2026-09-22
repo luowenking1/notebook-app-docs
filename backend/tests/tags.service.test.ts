@@ -15,22 +15,22 @@ describe('TagsService', () => {
     notebookId = notebooks.create(userId, 'Inbox').id;
   });
 
-  it('创建标签', () => {
-    const tag = service.create(userId, '工作');
-    expect(tag.name).toBe('工作');
+  it('creates a tag', () => {
+    const tag = service.create(userId, 'Work');
+    expect(tag.name).toBe('Work');
   });
 
-  it('同一用户下不能创建重复标签名', () => {
-    service.create(userId, '工作');
-    expect(() => service.create(userId, '工作')).toThrow();
+  it('rejects a duplicate tag name for the same user', () => {
+    service.create(userId, 'Work');
+    expect(() => service.create(userId, 'Work')).toThrow();
   });
 
-  it('不同用户可以有同名标签', () => {
-    service.create(userId, '工作');
-    expect(() => service.create('other-user', '工作')).not.toThrow();
+  it('allows different users to have the same tag name', () => {
+    service.create(userId, 'Work');
+    expect(() => service.create('other-user', 'Work')).not.toThrow();
   });
 
-  it('给笔记设置标签并读取', () => {
+  it('assigns tags to a note and reads them back', () => {
     const tag1 = service.create(userId, 'A');
     const tag2 = service.create(userId, 'B');
     const note = notes.create(userId, { title: 't', notebookId });
@@ -40,7 +40,7 @@ describe('TagsService', () => {
     expect(tags.map((t) => t.name).sort()).toEqual(['A', 'B']);
   });
 
-  it('重新设置标签会覆盖旧的标签集合', () => {
+  it('re-setting tags overwrites the previous tag set', () => {
     const tagA = service.create(userId, 'A');
     const tagB = service.create(userId, 'B');
     const note = notes.create(userId, { title: 't', notebookId });
@@ -52,13 +52,13 @@ describe('TagsService', () => {
     expect(tags.map((t) => t.id)).toEqual([tagB.id]);
   });
 
-  it('不能给笔记设置不属于自己的标签', () => {
+  it('cannot assign a tag that does not belong to the current user', () => {
     const otherTag = service.create('other-user', 'X');
     const note = notes.create(userId, { title: 't', notebookId });
     expect(() => service.setNoteTags(userId, note.id, [otherTag.id])).toThrow();
   });
 
-  it('删除标签后，笔记上也不再关联该标签', () => {
+  it('deleting a tag also removes it from any notes it was attached to', () => {
     const tag = service.create(userId, 'A');
     const note = notes.create(userId, { title: 't', notebookId });
     service.setNoteTags(userId, note.id, [tag.id]);

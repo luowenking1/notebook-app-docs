@@ -26,15 +26,17 @@ function buildSnippet(content: string, query: string, radius = 20): string {
   const start = Math.max(0, idx - radius);
   const end = Math.min(content.length, idx + query.length + radius);
   const raw = content.slice(start, end);
-  return (start > 0 ? '……' : '') + highlight(raw, query) + (end < content.length ? '……' : '');
+  return (start > 0 ? '...' : '') + highlight(raw, query) + (end < content.length ? '...' : '');
 }
 
 export class SearchService {
   /**
-   * 全文搜索：匹配标题或正文包含关键词的、未删除的笔记。
-   * 当前用内存的字符串匹配实现，行为与技术文档中 PostgreSQL tsvector 方案
-   * 对外暴露的 API 语义一致（大小写不敏感、返回高亮片段），
-   * 后续替换为真实全文索引时上层调用方不需要改动。
+   * Full-text search: matches non-deleted notes whose title or body
+   * contains the query. Currently implemented with in-memory string
+   * matching; its externally-visible API semantics (case-insensitive,
+   * returns highlighted snippets) match the PostgreSQL tsvector approach
+   * described in the technical doc, so callers won't need to change when
+   * this is swapped for a real full-text index later.
    */
   search(userId: string, query: string, options: SearchOptions = {}): SearchResultItem[] {
     if (!query || !query.trim()) return [];

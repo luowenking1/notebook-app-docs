@@ -15,51 +15,51 @@ describe('SearchService', () => {
   beforeEach(() => {
     store.reset();
     notebookId = notebooks.create(userId, 'Inbox').id;
-    notes.create(userId, { title: '项目启动会', content: '本次项目的关键里程碑', notebookId });
-    notes.create(userId, { title: '购物清单', content: '牛奶 鸡蛋', notebookId });
+    notes.create(userId, { title: 'Project kickoff meeting', content: 'Key milestones for this project', notebookId });
+    notes.create(userId, { title: 'Shopping list', content: 'Milk eggs', notebookId });
   });
 
-  it('能匹配标题中的关键词，并返回高亮片段', () => {
-    const results = service.search(userId, '项目');
+  it('matches a keyword in the title and returns a highlighted snippet', () => {
+    const results = service.search(userId, 'project');
     expect(results).toHaveLength(1);
-    expect(results[0].title).toContain('<em>项目</em>');
+    expect(results[0].title.toLowerCase()).toContain('<em>project</em>');
   });
 
-  it('能匹配正文中的关键词', () => {
-    const results = service.search(userId, '牛奶');
+  it('matches a keyword in the body', () => {
+    const results = service.search(userId, 'milk');
     expect(results).toHaveLength(1);
   });
 
-  it('空关键词返回空结果', () => {
+  it('returns an empty array for an empty query', () => {
     expect(service.search(userId, '')).toHaveLength(0);
     expect(service.search(userId, '   ')).toHaveLength(0);
   });
 
-  it('搜索结果只包含当前用户自己的笔记', () => {
-    expect(service.search('other-user', '项目')).toHaveLength(0);
+  it('only returns the current user\'s own notes', () => {
+    expect(service.search('other-user', 'project')).toHaveLength(0);
   });
 
-  it('搜索结果不包含已被软删除的笔记', () => {
+  it('excludes soft-deleted notes from results', () => {
     const [note] = [...store.notes.values()];
     note.isDeleted = true;
     const results = service.search(userId, note.title);
     expect(results.find((r) => r.noteId === note.id)).toBeUndefined();
   });
 
-  it('可以按 notebookId 过滤搜索结果', () => {
-    const otherNotebook = notebooks.create(userId, '其他笔记本').id;
-    notes.create(userId, { title: '项目复盘', content: '', notebookId: otherNotebook });
+  it('can filter search results by notebookId', () => {
+    const otherNotebook = notebooks.create(userId, 'Other notebook').id;
+    notes.create(userId, { title: 'Project retro', content: '', notebookId: otherNotebook });
 
-    const results = service.search(userId, '项目', { notebookId });
+    const results = service.search(userId, 'project', { notebookId });
     expect(results).toHaveLength(1);
   });
 
-  it('可以按 tagId 过滤搜索结果', () => {
-    const tag = tags.create(userId, '重要');
-    const [firstNote] = [...store.notes.values()].filter((n) => n.title.includes('项目'));
+  it('can filter search results by tagId', () => {
+    const tag = tags.create(userId, 'Important');
+    const [firstNote] = [...store.notes.values()].filter((n) => n.title.includes('Project'));
     tags.setNoteTags(userId, firstNote.id, [tag.id]);
 
-    const results = service.search(userId, '项目', { tagId: tag.id });
+    const results = service.search(userId, 'project', { tagId: tag.id });
     expect(results).toHaveLength(1);
     expect(results[0].noteId).toBe(firstNote.id);
   });

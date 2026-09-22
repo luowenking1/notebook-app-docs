@@ -1,13 +1,16 @@
 import { User, Notebook, Note, Tag, NoteTag } from '../types';
 
 /**
- * 内存数据仓库（Repository）。
+ * In-memory data repository.
  *
- * 为了让本地开发和自动化测试无需安装/配置真实数据库，这一版用内存 Map
- * 模拟了技术文档中设计的数据表结构（users / notebooks / notes / tags / note_tags）。
- * 上层的 *Service 只依赖这里暴露的集合，不关心底层存储实现，
- * 后续接入 PostgreSQL 时只需要替换这个文件（或实现同样接口的 Repository 类），
- * 不需要改动任何业务逻辑代码。
+ * To let local development and automated tests run without installing or
+ * configuring a real database, this version uses in-memory Maps to model
+ * the data tables designed in the technical doc (users / notebooks / notes /
+ * tags / note_tags). The *Service classes above only depend on the
+ * collections exposed here and don't care about the underlying storage
+ * implementation, so when PostgreSQL is wired up later, only this file (or
+ * a Repository class implementing the same interface) needs to be replaced —
+ * no business logic code needs to change.
  */
 class InMemoryStore {
   users: Map<string, User> = new Map();

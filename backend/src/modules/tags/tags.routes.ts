@@ -9,7 +9,7 @@ tagsRouter.post('/', ctrl.create);
 tagsRouter.patch('/:id', ctrl.rename);
 tagsRouter.delete('/:id', ctrl.remove);
 
-// 挂载在 /notes 前缀下使用：PUT /api/v1/notes/:noteId/tags
+// Mounted under the /notes prefix: PUT /api/v1/notes/:noteId/tags
 export const noteTagsRouter = Router();
 noteTagsRouter.use(requireAuth);
 noteTagsRouter.put('/:noteId/tags', ctrl.setNoteTags);
