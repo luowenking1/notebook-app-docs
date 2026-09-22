@@ -21,6 +21,11 @@
 
 * { box-sizing: border-box; }
 
+/* The `hidden` attribute must always win, even over classes that set their
+   own `display` (like .auth-screen{display:flex} / .app-shell{display:grid}).
+   Without this, toggling `.hidden = true/false` in JS has no visual effect. */
+[hidden] { display: none !important; }
+
 html, body {
   height: 100%;
   margin: 0;
