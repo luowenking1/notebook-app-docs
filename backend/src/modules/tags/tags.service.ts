@@ -52,6 +52,8 @@ export class TagsService {
   }
 
   getTagsForNote(userId: string, noteId: string): Tag[] {
+    const note = store.notes.get(noteId);
+    if (!note || note.userId !== userId) throw Errors.NotFound('Note not found');
     const tagIds = new Set(store.noteTags.filter((nt) => nt.noteId === noteId).map((nt) => nt.tagId));
     return [...store.tags.values()].filter((t) => t.userId === userId && tagIds.has(t.id));
   }

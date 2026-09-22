@@ -45,3 +45,11 @@ export function setNoteTags(req: AuthedRequest, res: Response, next: NextFunctio
     next(err);
   }
 }
+
+export function getNoteTags(req: AuthedRequest, res: Response, next: NextFunction): void {
+  try {
+    res.json(service.getTagsForNote(req.userId as string, req.params.noteId));
+  } catch (err) {
+    next(err);
+  }
+}

@@ -1,3 +1,4 @@
+import path from 'path';
 import express, { Express } from 'express';
 import { authRouter } from './modules/auth/auth.routes';
 import { notebooksRouter } from './modules/notebooks/notebooks.routes';
@@ -16,8 +17,14 @@ export function createApp(): Express {
   app.use('/api/v1/notebooks', notebooksRouter);
   app.use('/api/v1/notes', notesRouter);
   app.use('/api/v1/tags', tagsRouter);
-  app.use('/api/v1/notes', noteTagsRouter); // PUT /api/v1/notes/:noteId/tags
+  app.use('/api/v1/notes', noteTagsRouter); // GET/PUT /api/v1/notes/:noteId/tags
   app.use('/api/v1/search', searchRouter);
+
+  // Serve the small built-in web UI (backend/public) at the site root.
+  // `../public` resolves correctly whether this runs from src (ts-node) or
+  // dist (compiled build), since `public` sits alongside both as a sibling
+  // directory under the backend/ folder.
+  app.use(express.static(path.join(__dirname, '..', 'public')));
 
   app.use(errorHandler);
   return app;

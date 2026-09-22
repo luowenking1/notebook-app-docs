@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Notebook</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<!-- ===================== AUTH SCREEN ===================== -->
+<section id="auth-screen" class="auth-screen">
+  <div class="auth-panel">
+    <h1 class="auth-title">Notebook</h1>
+    <p class="auth-subtitle">A quiet place to keep what you're thinking.</p>
+
+    <form id="auth-form" class="auth-form">
+      <label class="field">
+        <span>Email</span>
+        <input type="email" id="auth-email" required autocomplete="email" />
+      </label>
+      <label class="field">
+        <span>Password</span>
+        <input type="password" id="auth-password" required autocomplete="current-password" minlength="6" />
+      </label>
+      <p id="auth-error" class="auth-error" hidden></p>
+      <button type="submit" id="auth-submit" class="btn btn-primary">Log in</button>
+    </form>
+
+    <p class="auth-toggle">
+      <span id="auth-toggle-text">Don't have an account?</span>
+      <button type="button" id="auth-toggle-btn" class="link-btn">Sign up</button>
+    </p>
+  </div>
+</section>
+
+<!-- ===================== APP SHELL ===================== -->
+<div id="app-shell" class="app-shell" hidden>
+
+  <header class="topbar">
+    <span class="brand">Notebook</span>
+    <div class="topbar-search">
+      <input type="search" id="search-input" placeholder="Search your notes" />
+    </div>
+    <div class="topbar-user">
+      <span id="user-email"></span>
+      <button id="logout-btn" class="link-btn">Log out</button>
+    </div>
+  </header>
+
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-heading">
+        <span>Notebooks</span>
+        <button id="new-notebook-btn" class="icon-btn" title="New notebook" aria-label="New notebook">+</button>
+      </div>
+      <form id="new-notebook-form" class="inline-form" hidden>
+        <input type="text" id="new-notebook-input" placeholder="Notebook name" />
+      </form>
+      <ul id="notebook-list" class="nav-list"></ul>
+    </div>
+
+    <div class="sidebar-section sidebar-tags">
+      <div class="sidebar-heading"><span>Tags</span></div>
+      <ul id="tag-filter-list" class="nav-list nav-list-tags"></ul>
+    </div>
+
+    <button id="trash-btn" class="sidebar-trash">Trash</button>
+  </aside>
+
+  <section class="note-list-pane">
+    <div class="pane-header">
+      <h2 id="note-list-title">Select a notebook</h2>
+      <button id="new-note-btn" class="btn btn-small" hidden>New note</button>
+    </div>
+    <ul id="note-list" class="note-list"></ul>
+    <p id="note-list-empty" class="empty-hint" hidden>Nothing here yet.</p>
+  </section>
+
+  <section class="editor-pane">
+    <div id="editor-empty" class="editor-empty">
+      <p>Select a note, or start a new one.</p>
+    </div>
+
+    <div id="editor" class="editor" hidden>
+      <div class="editor-toolbar">
+        <span id="save-status" class="save-status"></span>
+        <div class="editor-actions">
+          <button id="pin-btn" class="icon-btn" title="Pin note">☆</button>
+          <button id="restore-btn" class="btn btn-small" hidden>Restore</button>
+          <button id="delete-btn" class="btn btn-small btn-danger">Delete</button>
+          <button id="permanent-delete-btn" class="btn btn-small btn-danger" hidden>Delete forever</button>
+        </div>
+      </div>
+
+      <input id="note-title" class="note-title-input" placeholder="Untitled" />
+
+      <div class="tag-row">
+        <ul id="note-tags" class="tag-chips"></ul>
+        <input id="tag-input" class="tag-input" placeholder="add a tag, press enter" />
+      </div>
+
+      <textarea id="note-content" class="note-content" placeholder="Start writing..."></textarea>
+
+      <p class="editor-meta" id="editor-meta"></p>
+    </div>
+  </section>
+</div>
+
+<script src="/app.js"></script>
+</body>
+</html>

@@ -53,6 +53,10 @@ describe('Note-related routes (end-to-end integration)', () => {
     expect(setTagsRes.status).toBe(200);
     expect(setTagsRes.body[0].name).toBe('Important');
 
+    const getTagsRes = await request(app).get(`/api/v1/notes/${noteId}/tags`).set(auth);
+    expect(getTagsRes.status).toBe(200);
+    expect(getTagsRes.body[0].name).toBe('Important');
+
     // 5. Full-text search
     const searchRes = await request(app).get('/api/v1/search').set(auth).query({ q: 'Updated' });
     expect(searchRes.status).toBe(200);

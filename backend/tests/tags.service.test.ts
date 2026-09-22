@@ -66,4 +66,13 @@ describe('TagsService', () => {
     service.remove(userId, tag.id);
     expect(service.getTagsForNote(userId, note.id)).toHaveLength(0);
   });
+
+  it('cannot read tags for a note that does not exist', () => {
+    expect(() => service.getTagsForNote(userId, 'nonexistent-id')).toThrow();
+  });
+
+  it('cannot read tags for another user\'s note', () => {
+    const note = notes.create(userId, { title: 't', notebookId });
+    expect(() => service.getTagsForNote('intruder', note.id)).toThrow();
+  });
 });

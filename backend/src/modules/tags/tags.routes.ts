@@ -12,4 +12,5 @@ tagsRouter.delete('/:id', ctrl.remove);
 // Mounted under the /notes prefix: PUT /api/v1/notes/:noteId/tags
 export const noteTagsRouter = Router();
 noteTagsRouter.use(requireAuth);
+noteTagsRouter.get('/:noteId/tags', ctrl.getNoteTags);
 noteTagsRouter.put('/:noteId/tags', ctrl.setNoteTags);
