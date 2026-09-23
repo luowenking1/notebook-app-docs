@@ -18,7 +18,7 @@ export interface Notebook {
 export interface Note {
   id: string;
   userId: string;
-  notebookId: string;
+  notebookId: string | null;
   title: string;
   content: string;
   isPinned: boolean;
@@ -37,4 +37,16 @@ export interface Tag {
 export interface NoteTag {
   noteId: string;
   tagId: string;
+}
+
+export interface Attachment {
+  id: string;
+  userId: string;
+  noteId: string;
+  fileName: string;
+  originalName: string;
+  mimeType: string;
+  sizeBytes: number;
+  url: string;
+  createdAt: string;
 }

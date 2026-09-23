@@ -1,10 +1,10 @@
-import { store } from '../../db/store';
+import { pool } from '../../db/pool';
 
 export interface SearchResultItem {
   noteId: string;
   title: string;
   snippet: string;
-  notebookId: string;
+  notebookId: string | null;
   updatedAt: string;
 }
 
@@ -13,54 +13,63 @@ export interface SearchOptions {
   tagId?: string;
 }
 
-function highlight(text: string, query: string): string {
-  if (!query) return text;
-  const idx = text.toLowerCase().indexOf(query.toLowerCase());
-  if (idx === -1) return text;
-  return text.slice(0, idx) + '<em>' + text.slice(idx, idx + query.length) + '</em>' + text.slice(idx + query.length);
+interface SearchRow {
+  id: string;
+  notebook_id: string | null;
+  updated_at: Date;
+  title_headline: string;
+  snippet_headline: string;
 }
 
-function buildSnippet(content: string, query: string, radius = 20): string {
-  const idx = content.toLowerCase().indexOf(query.toLowerCase());
-  if (idx === -1) return content.slice(0, radius * 2);
-  const start = Math.max(0, idx - radius);
-  const end = Math.min(content.length, idx + query.length + radius);
-  const raw = content.slice(start, end);
-  return (start > 0 ? '...' : '') + highlight(raw, query) + (end < content.length ? '...' : '');
-}
+// StartSel/StopSel keep the highlighting markers identical to the previous
+// in-memory implementation, so API consumers (including the built-in web UI)
+// don't need to change.
+const HEADLINE_OPTS = 'StartSel=<em>, StopSel=</em>, HighlightAll=true';
+const SNIPPET_OPTS = 'StartSel=<em>, StopSel=</em>, MaxFragments=1, MaxWords=20, MinWords=5';
 
 export class SearchService {
   /**
-   * Full-text search: matches non-deleted notes whose title or body
-   * contains the query. Currently implemented with in-memory string
-   * matching; its externally-visible API semantics (case-insensitive,
-   * returns highlighted snippets) match the PostgreSQL tsvector approach
-   * described in the technical doc, so callers won't need to change when
-   * this is swapped for a real full-text index later.
+   * Full-text search over notes' title and body using PostgreSQL's built-in
+   * text search (tsvector/tsquery), matching the design in the technical
+   * doc. `plainto_tsquery` tokenizes and stems the user's input the same
+   * way the indexed `search_vector` column was built, and `ts_rank` orders
+   * results by relevance rather than just recency.
    */
-  search(userId: string, query: string, options: SearchOptions = {}): SearchResultItem[] {
+  async search(userId: string, query: string, options: SearchOptions = {}): Promise<SearchResultItem[]> {
     if (!query || !query.trim()) return [];
     const q = query.trim();
 
-    let notes = [...store.notes.values()].filter((n) => n.userId === userId && !n.isDeleted);
-    if (options.notebookId) notes = notes.filter((n) => n.notebookId === options.notebookId);
+    const conditions = ['user_id = $1', 'is_deleted = false', "search_vector @@ plainto_tsquery('english', $2)"];
+    const values: unknown[] = [userId, q];
+    let i = 3;
+
+    if (options.notebookId) {
+      conditions.push(`notebook_id = $${i++}`);
+      values.push(options.notebookId);
+    }
     if (options.tagId) {
-      const noteIdsWithTag = new Set(
-        store.noteTags.filter((nt) => nt.tagId === options.tagId).map((nt) => nt.noteId)
-      );
-      notes = notes.filter((n) => noteIdsWithTag.has(n.id));
+      conditions.push(`EXISTS (SELECT 1 FROM note_tags nt WHERE nt.note_id = notes.id AND nt.tag_id = $${i++})`);
+      values.push(options.tagId);
     }
 
-    const matched = notes.filter(
-      (n) => n.title.toLowerCase().includes(q.toLowerCase()) || n.content.toLowerCase().includes(q.toLowerCase())
+    const result = await pool.query<SearchRow>(
+      `SELECT
+         id, notebook_id, updated_at,
+         ts_headline('english', title, plainto_tsquery('english', $2), '${HEADLINE_OPTS}') AS title_headline,
+         ts_headline('english', content, plainto_tsquery('english', $2), '${SNIPPET_OPTS}') AS snippet_headline
+       FROM notes
+       WHERE ${conditions.join(' AND ')}
+       ORDER BY ts_rank(search_vector, plainto_tsquery('english', $2)) DESC
+       LIMIT 50`,
+      values
     );
 
-    return matched.map((n) => ({
-      noteId: n.id,
-      title: highlight(n.title, q),
-      snippet: buildSnippet(n.content, q),
-      notebookId: n.notebookId,
-      updatedAt: n.updatedAt,
+    return result.rows.map((row) => ({
+      noteId: row.id,
+      title: row.title_headline,
+      snippet: row.snippet_headline,
+      notebookId: row.notebook_id,
+      updatedAt: row.updated_at.toISOString(),
     }));
   }
 }

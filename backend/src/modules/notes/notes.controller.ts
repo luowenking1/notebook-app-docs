@@ -4,35 +4,35 @@ import { NotesService } from './notes.service';
 
 const service = new NotesService();
 
-export function create(req: AuthedRequest, res: Response, next: NextFunction): void {
+export async function create(req: AuthedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
-    const note = service.create(req.userId as string, req.body);
+    const note = await service.create(req.userId as string, req.body);
     res.status(201).json(note);
   } catch (err) {
     next(err);
   }
 }
 
-export function get(req: AuthedRequest, res: Response, next: NextFunction): void {
+export async function get(req: AuthedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
-    res.json(service.getOwned(req.userId as string, req.params.id));
+    res.json(await service.getOwned(req.userId as string, req.params.id));
   } catch (err) {
     next(err);
   }
 }
 
-export function update(req: AuthedRequest, res: Response, next: NextFunction): void {
+export async function update(req: AuthedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
-    res.json(service.update(req.userId as string, req.params.id, req.body));
+    res.json(await service.update(req.userId as string, req.params.id, req.body));
   } catch (err) {
     next(err);
   }
 }
 
-export function list(req: AuthedRequest, res: Response, next: NextFunction): void {
+export async function list(req: AuthedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
     const { notebookId, tagId, includeDeleted, page, pageSize } = req.query;
-    const notes = service.list(req.userId as string, {
+    const notes = await service.list(req.userId as string, {
       notebookId: notebookId as string | undefined,
       tagId: tagId as string | undefined,
       includeDeleted: includeDeleted === 'true',
@@ -45,34 +45,34 @@ export function list(req: AuthedRequest, res: Response, next: NextFunction): voi
   }
 }
 
-export function softDelete(req: AuthedRequest, res: Response, next: NextFunction): void {
+export async function softDelete(req: AuthedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
-    res.json(service.softDelete(req.userId as string, req.params.id));
+    res.json(await service.softDelete(req.userId as string, req.params.id));
   } catch (err) {
     next(err);
   }
 }
 
-export function restore(req: AuthedRequest, res: Response, next: NextFunction): void {
+export async function restore(req: AuthedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
-    res.json(service.restore(req.userId as string, req.params.id));
+    res.json(await service.restore(req.userId as string, req.params.id));
   } catch (err) {
     next(err);
   }
 }
 
-export function permanentDelete(req: AuthedRequest, res: Response, next: NextFunction): void {
+export async function permanentDelete(req: AuthedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
-    service.permanentDelete(req.userId as string, req.params.id);
+    await service.permanentDelete(req.userId as string, req.params.id);
     res.status(204).send();
   } catch (err) {
     next(err);
   }
 }
 
-export function pin(req: AuthedRequest, res: Response, next: NextFunction): void {
+export async function pin(req: AuthedRequest, res: Response, next: NextFunction): Promise<void> {
   try {
-    res.json(service.setPinned(req.userId as string, req.params.id, !!req.body.pinned));
+    res.json(await service.setPinned(req.userId as string, req.params.id, !!req.body.pinned));
   } catch (err) {
     next(err);
   }

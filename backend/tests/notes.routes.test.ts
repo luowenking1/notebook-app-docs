@@ -1,6 +1,6 @@
 import request from 'supertest';
 import { createApp } from '../src/app';
-import { store } from '../src/db/store';
+import { resetDb, closeDb } from './testDb';
 
 const app = createApp();
 
@@ -10,7 +10,8 @@ async function registerAndLogin(email: string): Promise<string> {
 }
 
 describe('Note-related routes (end-to-end integration)', () => {
-  beforeEach(() => store.reset());
+  beforeEach(async () => resetDb());
+  afterAll(async () => closeDb());
 
   it('accessing a protected endpoint without a token returns 401', async () => {
     const res = await request(app).get('/api/v1/notebooks');

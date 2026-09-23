@@ -1,9 +1,11 @@
 import request from 'supertest';
 import { createApp } from '../src/app';
+import { closeDb } from './testDb';
 
 const app = createApp();
 
 describe('Static frontend', () => {
+  afterAll(async () => closeDb());
   it('serves the built-in web UI at the site root', async () => {
     const res = await request(app).get('/');
     expect(res.status).toBe(200);
