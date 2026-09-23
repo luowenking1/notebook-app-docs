@@ -1,3 +1,4 @@
+import fs from 'fs';
 import path from 'path';
 import express, { Express } from 'express';
 import { authRouter } from './modules/auth/auth.routes';
@@ -27,11 +28,18 @@ export function createApp(): Express {
   // check on the static file itself since paths include an unguessable UUID.
   app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 
-  // Serve the small built-in web UI (backend/public) at the site root.
-  // `../public` resolves correctly whether this runs from src (ts-node) or
-  // dist (compiled build), since `public` sits alongside both as a sibling
-  // directory under the backend/ folder.
-  app.use(express.static(path.join(__dirname, '..', 'public')));
+  // The original small vanilla-JS UI (backend/public) is always available at
+  // /legacy, whether or not the React app below has been built.
+  const publicDir = path.join(__dirname, '..', 'public');
+  app.use('/legacy', express.static(publicDir));
+
+  // The React frontend (../../frontend, a sibling of backend/) is the
+  // primary UI once built (`cd frontend && npm run build`). If it hasn't
+  // been built yet — e.g. a fresh clone where only the backend has been
+  // set up — fall back to serving the vanilla UI at `/` too, so `npm run
+  // dev` in backend/ alone still shows something useful.
+  const frontendDist = path.join(__dirname, '..', '..', 'frontend', 'dist');
+  app.use(express.static(fs.existsSync(frontendDist) ? frontendDist : publicDir));
 
   app.use(errorHandler);
   return app;
